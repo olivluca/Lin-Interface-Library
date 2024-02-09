@@ -10,6 +10,7 @@
 
 #include <Arduino.h>
 
+#define SPACEBITS 0
 /// @brief reads data from a lin device by requesting a specific FrameID
 /// @details Start frame and read answer from bus device
 /// The received data will be passed to the Lin_Interface::LinMessage[] array
@@ -135,8 +136,13 @@ void Lin_Interface::writeFrame(uint8_t FrameID, uint8_t dataLen)
     for (int i = 0; i < dataLen; ++i)
     {
         HardwareSerial::write(LinMessage[i]); // Message (array from 1..8)
+        HardwareSerial::flush();
+        delayMicroseconds(1000000 / baud * SPACEBITS);
+
     }
     HardwareSerial::write(cksum);
+        HardwareSerial::flush();
+        delayMicroseconds(1000000 / baud * SPACEBITS);
 
     // wait for available data
     delay(20);
@@ -224,8 +230,12 @@ void Lin_Interface::writeFrameClassic(uint8_t FrameID, uint8_t dataLen)
     for (int i = 0; i < dataLen; ++i)
     {
         HardwareSerial::write(LinMessage[i]); // Message (array from 1..8)
+        HardwareSerial::flush();
+        delayMicroseconds(1000000 / baud * SPACEBITS);
     }
     HardwareSerial::write(cksum);
+        HardwareSerial::flush();
+        delayMicroseconds(1000000 / baud * SPACEBITS);
     HardwareSerial::flush();
 
 /// TODO: verification of written data (see Lin_Interface::writeFrame)
@@ -246,7 +256,11 @@ void Lin_Interface::startTransmission(uint8_t ProtectedID)
 
     writeBreak();                       // initiate Frame with a Break
     HardwareSerial::write(0x55);        // Sync
+        HardwareSerial::flush();
+        delayMicroseconds(1000000 / baud * SPACEBITS);
     HardwareSerial::write(ProtectedID); // PID
+        HardwareSerial::flush();
+        delayMicroseconds(1000000 / baud * SPACEBITS);
 } 
 
 /// Send a Break for introduction of a Frame
@@ -264,6 +278,7 @@ size_t Lin_Interface::writeBreak()
     HardwareSerial::flush();
     // restore normal speed
     HardwareSerial::updateBaudRate(baud);
+        delayMicroseconds(1000000 / baud * SPACEBITS);
     return ret;
 }
 
